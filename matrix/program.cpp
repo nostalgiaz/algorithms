@@ -21,7 +21,7 @@ int main()
     int *columnSum = new int[c];
     for(int z=0; z<r; z++)
     {
-         for(int i=0; i<c; i++)
+        for(int i=0; i<c; i++)
             columnSum[i] = 0;
 
         for(int x=z; x<r; x++)
