@@ -6,15 +6,19 @@
 
 using namespace std;
 
+void swap(vector<int> &v, int i, int j) {
+  int tmp = v[i];
+  v[i] = v[j];
+  v[j] = tmp;
+}
+
 int s(vector<int> v, int n) {
   int s=0, tmp;
 
   for(int i=n-1; i>=0; i--)
     for(int j=0; j<n; j++)
       if(v[j] == i+1 && j!=i) {
-        tmp = v[j];
-        v[j] = v[i];
-        v[i] = tmp;
+        swap(v, i ,j);
         s++;
         break;
       }
@@ -42,11 +46,7 @@ int p(vector<int> v, int n) {
 
       tmpSum += v[targetPos];
       tmpCount++;
-
-      tmp = v[targetPos];
-      v[targetPos] = v[posCurrent];
-      v[posCurrent] = tmp;
-
+      swap(v, targetPos, posCurrent);
       posCurrent = targetPos;
     }
     p += min(
