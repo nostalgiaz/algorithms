@@ -23,15 +23,9 @@ vector<int> vicere;
 int nodeBool[MAX];
 
 int giveMeTheVicere(int cc, int i) {
-  for(int j=0; j<=cc; j++) {
-    for(int z=0; z<island[j].size(); z++) {
-      if(vicereTmp[i] == island[j][z]) {
-        if(island[j].size() != 1)
-          return island[j][(z == 0? 1 : 0)];
-        else return island[j][0];
-      }
-    }
-  }
+  if(island[islandReverse[vicereTmp[i]]].size() != 1)
+    return island[islandReverse[vicereTmp[i]]][1];
+  else return island[islandReverse[vicereTmp[i]]][0];
 }
 
 void DFS_VISIT(vector<int> G[], int u) {
@@ -75,8 +69,7 @@ void ARTICULATION_BRIDGE(vector<int> G[]) {
   sort(bridge.begin(), bridge.end());
 }
 
-int main(void)
-{
+int main(void) {
   int u, v, cc = -1;
   bool same;
 
