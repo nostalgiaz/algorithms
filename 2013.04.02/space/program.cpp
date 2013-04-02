@@ -1,6 +1,7 @@
 #include <fstream>
 #include <algorithm>
 #include <vector>
+#include <iostream>
 #include <queue>
 #include <limits>
 #define MAX 500000
@@ -24,7 +25,7 @@ int nodeBool[MAX];
 
 int giveMeTheVicere(int cc, int i) {
   if(island[islandReverse[vicereTmp[i]]].size() != 1)
-    return island[islandReverse[vicereTmp[i]]][1];
+    return island[islandReverse[vicereTmp[i]]][(island[islandReverse[vicereTmp[i]]][0] == vicereTmp[i]? 1 : 0)];
   else return island[islandReverse[vicereTmp[i]]][0];
 }
 
