@@ -17,7 +17,6 @@ int u, v, index_, begin, end;
 
 list<int> articulationNodes;
 list<int>::iterator it;
-
 vector< vector<int> > nodes;
 vector< vector<int> > island;
 vector<bool> nodesBool;
@@ -33,12 +32,10 @@ void dfsVisit(int u) {
       p[v] = u;
       dfsVisit(v);
       if(d[u] == 1) {
-        if(nodes[u].size() >= 2 && low[v] > d[u]) {
+        if(nodes[u].size() >= 2 && low[v] > d[u])
           articulationNodes.push_front(u);
-        }
-      } else if(low[v] >= d[u]) {
+      } else if(low[v] >= d[u])
         articulationNodes.push_front(u);
-      }
       low[u] = min(low[u],low[v]);
     } else if(p[u] != v) {
       low[u] = min(low[u],d[v]);
@@ -103,7 +100,6 @@ int main(void)
   }
 
   dfs();
-
   articulationNodes.unique();
 
   for(it=articulationNodes.begin(); it != articulationNodes.end(); ++it)
@@ -118,22 +114,17 @@ int main(void)
 
   for(int i=0; i<=cc; i++) {
     set<int> s;
-
     for(int j=0; j<island[i].size(); j++) {
       s.insert(island[i][j]);
-      for(int k=0; k<nodes[island[i][j]].size(); k++) {
+      for(int k=0; k<nodes[island[i][j]].size(); k++)
         s.insert(nodes[island[i][j]][k]);
-      }
     }
-
     if(s.size() == island[i].size() + 1)
       vicere.push_back(island[i][0]);
   }
 
   out << vicere.size() << endl;
-
   for(int i=0; i<vicere.size(); i++)
     out << vicere[i] << " ";
-
   return 0;
 }
