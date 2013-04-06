@@ -50,12 +50,12 @@ void dfsVisit(int u) {
 }
 
 void dfs() {
-  for(int u=0; u<=n; u++) {
+  for(int u=0; u<n; u++) {
     color[u] = WHITE;
     p[u] = NIL;
   }
   t = 0;
-  for(int u=1; u<=n; u++)
+  for(int u=0; u<n; u++)
     if(color[u] == WHITE)
       dfsVisit(u);
 }
