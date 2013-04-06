@@ -1,0 +1,219 @@
+#include <fstream>
+#include <algorithm>
+#include <vector>
+#include <iostream>
+#include <queue>
+#include <limits>
+#include <list>
+#define MAX 500000
+
+using namespace std;
+
+enum colors {BLACK, WHITE, GRAY};
+int color[MAX], d[MAX], p[MAX], f[MAX], low[MAX], t, n, m;
+int NIL = numeric_limits<int>::min();
+
+vector< vector<int> > nodes;
+vector< pair<int,int> > bridge;
+vector< pair<int,int> >::iterator it;
+
+vector<int> island[MAX];
+vector<int> islandBridge[MAX];
+int islandReverse[MAX];
+list<int> articPoints;
+list<int>::iterator itPoint;
+
+vector<int> vicereTmp;
+vector<int> vicere;
+bool nodesBool[MAX];
+typedef pair<int,int> edges;
+
+
+void DFS_VISIT(vector<int> G[], int u) {
+    t = t + 1;
+    d[u] = low[u] = t;
+    color[u] = GRAY;
+    for(int i=0; i<G[u].size(); i++) {
+        int v = G[u][i];
+        if(color[v] == WHITE) {
+            p[v] = u;
+            DFS_VISIT(G,v);
+            if(d[u] == 1) {
+                if(G[u].size() >= 2 && low[v] > d[u]) {
+                    // special case for root
+                    // root is an artic. point if there are two or more children
+                    bridge.push_back(edges(u,v));
+                }
+            } else if(low[v] > d[u]) {
+                bridge.push_back(edges(u,v));
+            } else  if(low[v] = d[u]) {
+                                   articPoints.push_front(u);
+                               }
+            low[u] = min(low[u],low[v]);
+        } else if(p[u] != v) {
+            low[u] = min(low[u],d[v]);
+        }
+    }
+    color[u] = BLACK;
+    t = t + 1;
+    f[u] = t;
+}
+
+void DFS(vector<int> G[]) {
+  for(int u=0; u<n; u++) {
+    color[u] = WHITE;
+    p[u] = NIL;
+  }
+  t = 0;
+  for(int u=1; u<=n; u++) {
+    if(color[u] == WHITE) {
+      DFS_VISIT(G,u);
+    }
+  }
+}
+
+void ARTICULATION_BRIDGE(vector<int> G[]) {
+  DFS(G);
+  sort(bridge.begin(), bridge.end());
+  articPoints.unique();
+                       articPoints.sort();
+}
+
+int main(void) {
+  int u, v, cc = -1;
+  bool same;
+
+  ifstream in("input.txt");
+  ofstream out("output.txt");
+
+  in >> n >> m;
+
+    nodes.resize(n);
+
+  for(int e=0; e<m; e++) {
+    in >> u >> v;
+    nodes[u].push_back(v);
+    nodes[v].push_back(u);
+  }
+
+  ARTICULATION_BRIDGE(nodes);
+
+  for(it=bridge.begin(); it != bridge.end(); ++it) {
+    int index = find(nodes[it->first].begin(), nodes[it->first].end(), it->second) - nodes[it->first].begin();
+    nodes[it->first].erase(nodes[it->first].begin() + index);
+
+    index = find(nodes[it->second].begin(), nodes[it->second].end(), it->first) - nodes[it->second].begin();
+    nodes[it->second].erase(nodes[it->second].begin() + index);
+  }
+
+    for(itPoint=articPoints.begin(); itPoint != articPoints.end(); ++itPoint) {
+    nodes.erase(nodes.begin() + *itPoint);
+    }
+
+  for(int i=0; i<articPoints.size(); i++) {
+    nodes.erase(nodes.begin() + articPoints[i]);
+  }
+
+  for(int i=0; i<n; i++)
+    nodesBool[i] = false;
+
+  for(int i=0; i<n; i++) {
+    if(!nodesBool[i]) {
+      queue<int> q;
+      q.push(i);
+      nodesBool[i] = true;
+      cc++;
+      island[cc].push_back(i);
+      islandReverse[i] = cc;
+
+      while(!q.empty()){
+        int u, v;
+        v = q.front();
+        q.pop();
+        for(int j=0; j<nodes[v].size(); j++){
+          u = nodes[v][j];
+          if(!nodesBool[u]) {
+            q.push(u);
+            nodesBool[u] = true;
+            island[cc].push_back(u);
+            islandReverse[u] = cc;
+          }
+        }
+      }
+    }
+  }
+
+  if (cc == 0) {  // cerchio
+    out << "2\n0 1";
+    return 0;
+  }
+
+  for(it=bridge.begin(); it != bridge.end(); ++it) {
+    islandBridge[islandReverse[it->first]].push_back(it->first);
+    islandBridge[islandReverse[it->second]].push_back(it->second);
+  }
+
+  for(int i=0; i<=cc; i++) {
+    same = true;
+
+    if(islandBridge[i].size() == 1){
+      vicereTmp.push_back(islandBridge[i][0]);
+    }
+    else if(islandBridge[i].size() > 1) {
+      for(int j=1; j<islandBridge[i].size(); j++) {
+        if(islandBridge[i][j-1] != islandBridge[i][j]) {
+          same=false;
+          break;
+        }
+      }
+      if(same)
+        if(island[islandReverse[islandBridge[i][0]]].size() > 1)
+          vicereTmp.push_back(islandBridge[i][0]);
+    }
+  }
+
+  for(int i=0; i<vicereTmp.size(); i++) {
+    if(island[islandReverse[vicereTmp[i]]].size() == 1)
+      vicere.push_back(island[islandReverse[vicereTmp[i]]][0]);
+
+    else {
+      int islandIndex = islandReverse[vicereTmp[i]];
+      int bridgeOfTheCurrentIsland = islandBridge[islandIndex][0];
+
+      int index = find(island[islandReverse[bridgeOfTheCurrentIsland]].begin(), island[islandReverse[bridgeOfTheCurrentIsland]].end(), bridgeOfTheCurrentIsland) - island[islandReverse[bridgeOfTheCurrentIsland]].begin();
+      island[islandReverse[bridgeOfTheCurrentIsland]].erase(island[islandReverse[bridgeOfTheCurrentIsland]].begin() + index);
+
+      for(int j=0; j<n; j++)
+        nodesBool[j] = false;
+      for(int j=0; j<island[islandIndex].size(); j++) {
+        if(!nodesBool[island[islandIndex][j]]) {
+          queue<int> q;
+          q.push(island[islandIndex][j]);
+          nodesBool[island[islandIndex][j]] = true;
+          vicere.push_back(island[islandIndex][j]);
+          while(!q.empty()){
+            int u, v;
+            v = q.front();
+            q.pop();
+            for(int k=0; k<nodes[v].size(); k++){
+                u = nodes[v][k];
+              if(u != bridgeOfTheCurrentIsland) {
+                if(!nodesBool[u]) {
+                  q.push(u);
+                  nodesBool[u] = true;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  out << vicere.size() << endl;
+
+  for(int i=0; i<vicere.size(); i++)
+    out << vicere[i] << " ";
+
+  return 0;
+}

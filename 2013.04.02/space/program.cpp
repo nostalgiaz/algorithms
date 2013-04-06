@@ -1,109 +1,66 @@
 #include <fstream>
-#include <algorithm>
-#include <vector>
+#include <cstdio>
 #include <iostream>
+#include <vector>
+#include <list>
 #include <queue>
+#include <set>
 #include <limits>
 #define MAX 500000
 
 using namespace std;
 
 enum colors {BLACK, WHITE, GRAY};
-int color[MAX], d[MAX], p[MAX], f[MAX], low[MAX], t, n, m;
+int color[MAX], d[MAX], p[MAX], f[MAX], low[MAX], t, n, m, cc=-1;
 int NIL = numeric_limits<int>::min();
+int u, v, index_, begin, end;
 
-vector<int> nodes[MAX];
-vector< pair<int,int> > bridge;
-vector< pair<int,int> >::iterator it;
+list<int> articulationNodes;
+list<int>::iterator it;
 
-vector<int> island[MAX];
-vector<int> islandBridge[MAX];
-int islandReverse[MAX];
-
-vector<int> vicereTmp;
+vector< vector<int> > nodes;
+vector< vector<int> > island;
+vector<bool> nodesBool;
 vector<int> vicere;
-bool nodesBool[MAX];
 
-int giveMeTheVicere(int vicere) {
-  if(island[islandReverse[vicere]].size() == 1)
-    return island[islandReverse[vicere]][0];
-
-  int index = 0;
-  int islandIndex = islandReverse[vicere];
-
-  int bridgeOfTheCurrentIsland = islandBridge[islandIndex][0];
-  if(bridgeOfTheCurrentIsland == vicere && vicere == island[islandIndex][0])
-    index = 1;
-  return island[islandIndex][index];
-}
-
-void DFS_VISIT(vector<int> G[], int u) {
+void dfsVisit(int u) {
   t++;
   d[u] = low[u] = t;
   color[u] = GRAY;
-  for(int i=0; i<G[u].size(); i++) {
-    int v = G[u][i];
+  for(int i=0; i<nodes[u].size(); i++) {
+    int v = nodes[u][i];
     if(color[v] == WHITE) {
       p[v] = u;
-      DFS_VISIT(G,v);
-      if(low[v] > d[u])
-        bridge.push_back(make_pair(u,v));
+      dfsVisit(v);
+      if(d[u] == 1) {
+        if(nodes[u].size() >= 2 && low[v] > d[u]) {
+          articulationNodes.push_front(u);
+        }
+      } else if(low[v] >= d[u]) {
+        articulationNodes.push_front(u);
+      }
       low[u] = min(low[u],low[v]);
-    }
-    else if(p[u] != v)
+    } else if(p[u] != v) {
       low[u] = min(low[u],d[v]);
+    }
   }
   color[u] = BLACK;
   t++;
   f[u] = t;
 }
 
-void DFS(vector<int> G[]) {
-  for(int u=0; u<n; u++) {
+void dfs() {
+  for(int u=0; u<=n; u++) {
     color[u] = WHITE;
     p[u] = NIL;
   }
   t = 0;
-  for(int u=0; u<n; u++) {
-    if(color[u] == WHITE) {
-      DFS_VISIT(G,u);
-    }
-  }
+  for(int u=1; u<=n; u++)
+    if(color[u] == WHITE)
+      dfsVisit(u);
 }
 
-void ARTICULATION_BRIDGE(vector<int> G[]) {
-  DFS(G);
-  sort(bridge.begin(), bridge.end());
-}
-
-int main(void) {
-  int u, v, cc = -1;
-  bool same;
-
-  ifstream in("input.txt");
-  ofstream out("output.txt");
-
-  in >> n >> m;
-
-  for(int e=0; e<m; e++) {
-    in >> u >> v;
-    nodes[u].push_back(v);
-    nodes[v].push_back(u);
-  }
-
-  ARTICULATION_BRIDGE(nodes);
-
-  for(it=bridge.begin(); it != bridge.end(); ++it) {
-    int index = find(nodes[it->first].begin(), nodes[it->first].end(), it->second) - nodes[it->first].begin();
-    nodes[it->first].erase(nodes[it->first].begin() + index);
-
-    index = find(nodes[it->second].begin(), nodes[it->second].end(), it->first) - nodes[it->second].begin();
-    nodes[it->second].erase(nodes[it->second].begin() + index);
-  }
-
-  for(int i=0; i<n; i++)
-    nodesBool[i] = false;
-
+void connectedComponents() {
   for(int i=0; i<n; i++) {
     if(!nodesBool[i]) {
       queue<int> q;
@@ -111,55 +68,67 @@ int main(void) {
       nodesBool[i] = true;
       cc++;
       island[cc].push_back(i);
-      islandReverse[i] = cc;
-
-      while(!q.empty()){
+      while(!q.empty()) {
         int u, v;
         v = q.front();
         q.pop();
-        for(int j=0; j<nodes[v].size(); j++){
+        for(int j=0; j<nodes[v].size(); j++) {
           u = nodes[v][j];
           if(!nodesBool[u]) {
             q.push(u);
             nodesBool[u] = true;
             island[cc].push_back(u);
-            islandReverse[u] = cc;
           }
         }
       }
     }
   }
+}
 
-  if (cc == 0) {  // cerchio
-    out << "2\n0 1";
+int main(void)
+{
+  ifstream in("input.txt");
+  ofstream out("output.txt");
+
+  in >> n >> m;
+
+  nodes.resize(n);
+  nodesBool.resize(n, false);
+  island.resize(n);
+
+  for(int i=0; i<m; i++) {
+    in >> u >> v;
+    nodes[u].push_back(v);
+    nodes[v].push_back(u);
+  }
+
+  dfs();
+
+  articulationNodes.unique();
+
+  for(it=articulationNodes.begin(); it != articulationNodes.end(); ++it)
+    nodesBool[*it] = true;
+
+  connectedComponents();
+
+  if(cc == 0) {
+    out << "2" << endl << "0 1";
     return 0;
   }
 
-  for(it=bridge.begin(); it != bridge.end(); ++it) {
-    islandBridge[islandReverse[it->first]].push_back(it->first);
-    islandBridge[islandReverse[it->second]].push_back(it->second);
-  }
-
   for(int i=0; i<=cc; i++) {
-    same = true;
+    set<int> s;
 
-    if(islandBridge[i].size() == 1)
-      vicereTmp.push_back(islandBridge[i][0]);
-    else if(islandBridge[i].size() > 1) {
-      for(int j=1; j<islandBridge[i].size(); j++) {
-        if(islandBridge[i][j-1] != islandBridge[i][j]) {
-          same=false;
-          break;
-        }
+    for(int j=0; j<island[i].size(); j++) {
+      s.insert(island[i][j]);
+      for(int k=0; k<nodes[island[i][j]].size(); k++) {
+        s.insert(nodes[island[i][j]][k]);
       }
-      if(same)
-        if(island[islandReverse[islandBridge[i][0]]].size() > 1)
-          vicereTmp.push_back(islandBridge[i][0]);
     }
-  }
 
-  for(int i=0; i<vicereTmp.size(); i++)
-    vicere.push_back(giveMeTheVicere(vicereTmp[i]));
+    if(s.size() == island[i].size() + 1)
+      vicere.push_back(island[i][0]);
+  }
 
   out << vicere.size() << endl;
 
