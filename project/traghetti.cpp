@@ -92,8 +92,23 @@ int main()
     v = &edges[zombieEdge.second];
     v->erase(find(v->begin(), v->end(), zombieEdge.first));
 
-  vector<int> left = bfs(path[start-1]);
-  vector<int> right = bfs(path[end+1]);
+  vector<int> left = bfs(path[0]);
+  vector<int> right = bfs(path[path.size() -1]);
+
+  cout << "PATH: ";
+  for(int i=0; i<path.size(); i++)
+    cout << path[i] << " ";
+  cout << endl;
+
+  cout << "LEFT: ";
+  for(int i=0; i<left.size(); i++)
+    cout << left[i] << " ";
+  cout << endl;
+
+  cout << "RIGHT: ";
+  for(int i=0; i<right.size(); i++)
+    cout << right[i] << " ";
+  cout << endl;
 
    newEdge = make_pair(left[left.size() / 2], right[right.size() / 2]);
 
