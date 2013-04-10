@@ -51,8 +51,7 @@ vector<int> maxwalk()
     for (i=0; i != n; i++)
         if (edges[i].size() == 1) {
             tmp = bfs(i);
-            if(tmp.size() > maxPath.size())
-              maxPath = tmp;
+            return bfs(tmp[0]);
         }
 
     return maxPath;
