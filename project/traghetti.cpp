@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <queue>
 #include <algorithm>
 
 using namespace std;
@@ -8,49 +9,53 @@ using namespace std;
 int n, m;
 vector<int>* edges;
 
+vector<int> bfs(int node) {
+  int u, v;
+  queue<int> q;
+  vector<int> parent (n, -1);
+  vector<bool> nodesBool (n, false);
+  vector<int> maxPath;
 
-vector<int>* maxdfs(int i, vector<int>* maxdepth)
-{
-    vector<int>* m;
-    int tmp;
-    vector<int>::iterator foo;
+  q.push(node);
+  nodesBool[node] = true;
 
-    if (!edges[i].size()) return &maxdepth[i];
+  while(!q.empty()) {
+    v = q.front();
+    q.pop();
 
-    for (vector<int>::iterator it = edges[i].begin(); it != edges[i].end(); it++) {
-        foo = find(edges[*it].begin(), edges[*it].end(), i);
-        if (foo != edges[*it].end())
-           edges[*it].erase(foo);
-        m  = maxdfs(*it, maxdepth);
-        if (maxdepth[i].size() < m->size())
-            maxdepth[i] = *m;
+    for(int i=0; i<edges[v].size(); i++) {
+      u = edges[v][i];
+      if(nodesBool[u] == false) {
+        parent[u] = v;
+        nodesBool[u] = true;
+        q.push(u);
+      }
     }
+  }
 
-    maxdepth[i].push_back(i);
-    return &maxdepth[i];
+  while(v != -1) {
+    maxPath.push_back(v);
+    v = parent[v];
+  }
+
+  return maxPath;
 }
 
 vector<int> maxwalk()
 {
     vector<int> nodes[n];
+    vector<int> maxPath;
+    vector<int> tmp;
     size_t i;
-    size_t startleaf;
 
     for (i=0; i != n; i++)
         if (edges[i].size() == 1) {
-            nodes[i].push_back(i);
-            startleaf = i;
+            tmp = bfs(i);
+            if(tmp.size() > maxPath.size())
+              maxPath = tmp;
         }
 
-
-    maxdfs(startleaf, nodes);
-
-    vector<int> maxpath;
-    for (size_t i=0; i!=n; i++)
-        if (maxpath.size() < nodes[i].size())
-            maxpath = nodes[i];
-
-    return maxpath;
+    return maxPath;
 }
 
 int main()
@@ -68,20 +73,29 @@ int main()
         edges[end].push_back(start);
     }
 
-
     vector<int> path = maxwalk();
+
     pair<int, int> zombieEdge;
     pair<int, int> newEdge;
 
     start = end = path.size() / 2;
     if(path.size() % 2 == 1) // odd
       end++;
-    else // pair
+    else // even
       start--;
 
     zombieEdge = make_pair(path[start], path[end]);
 
-    newEdge = make_pair(path[start / 2], path[path.size() - (end / 2)]);
+    vector<int>* v = &edges[zombieEdge.first];
+    v->erase(find(v->begin(), v->end(), zombieEdge.second));
+
+    v = &edges[zombieEdge.second];
+    v->erase(find(v->begin(), v->end(), zombieEdge.first));
+
+  vector<int> left = bfs(path[start-1]);
+  vector<int> right = bfs(path[end+1]);
+
+   newEdge = make_pair(left[left.size() / 2], right[right.size() / 2]);
 
     out << zombieEdge.first << " " << zombieEdge.second << endl;
     out << newEdge.first << " " << newEdge.second;
