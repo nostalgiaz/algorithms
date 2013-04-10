@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -8,38 +9,48 @@ int n, m;
 vector<int>* edges;
 
 
-vector<int> maxdfs(int i, vector<int>* maxdepth)
+vector<int>* maxdfs(int i, vector<int>* maxdepth)
 {
-    vector<int> ret = {0, 2, 3, 5, 7, 8, 10};
-
-    int m = 0;
+    vector<int>* m;
     int tmp;
+    vector<int>::iterator foo;
 
-    if (!maxdepth[i].size()) return maxdepth[i];
+    if (!edges[i].size()) return &maxdepth[i];
 
-    for (vector<int>::const_iterator it = edges[i].begin(); it != edges[i].end(); it++) {
-        maxdepth[i] = maxdfs(*it, maxdepth);
-        if (maxdepth[i].size() > m) m = maxdepth[i].size();
+    for (vector<int>::iterator it = edges[i].begin(); it != edges[i].end(); it++) {
+        foo = find(edges[*it].begin(), edges[*it].end(), i);
+        if (foo != edges[*it].end())
+           edges[*it].erase(foo);
+        m  = maxdfs(*it, maxdepth);
+        if (maxdepth[i].size() < m->size())
+            maxdepth[i] = *m;
     }
 
-    maxdepth[i] = m + 1;
-    return maxdepth[i];
+    maxdepth[i].push_back(i);
+    return &maxdepth[i];
 }
 
 vector<int> maxwalk()
 {
     vector<int> nodes[n];
     size_t i;
-
-    fill(nodes, nodes+n, 0);
+    size_t startleaf;
 
     for (i=0; i != n; i++)
-        if (edges[i] == 1)
-            break;
+        if (edges[i].size() == 1) {
+            edges[i].push_back(i);
+            startleaf = i;
+        }
 
-    maxdfs(i, nodes);
 
-    return *max_element(nodes, nodes+n);
+    maxdfs(startleaf, nodes);
+
+    vector<int> maxpath;
+    for (size_t i=0; i!=n; i++)
+        if (maxpath.size() < nodes[i].size())
+            maxpath = nodes[i];
+
+    return maxpath;
 }
 
 int main()
@@ -56,6 +67,13 @@ int main()
         edges[start].push_back(end);
         edges[end].push_back(start);
     }
+
+
+    vector<int> v = maxwalk();
+
+    for (vector<int>::iterator it = v.begin(); it!=v.end(); it++)
+        cout << *it << " ";
+    cout << endl;
 
     return 0;
 }
