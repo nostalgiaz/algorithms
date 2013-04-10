@@ -11,14 +11,7 @@ vector<int>* edges;
 
 vector<int>* maxdfs(int i, vector<int>* maxdepth)
 {
-<<<<<<< HEAD:traghetti.cpp
     vector<int>* m;
-=======
-  /*
-    vector<int> ret = {0, 2, 3, 5, 7, 8, 10};
-
-    int m = 0;
->>>>>>> 8b3c767f0da37eaabe51c9dda5ccf2629433e075:project/traghetti.cpp
     int tmp;
     vector<int>::iterator foo;
 
@@ -33,26 +26,19 @@ vector<int>* maxdfs(int i, vector<int>* maxdepth)
             maxdepth[i] = *m;
     }
 
-<<<<<<< HEAD:traghetti.cpp
     maxdepth[i].push_back(i);
     return &maxdepth[i];
-=======
-    maxdepth[i] = m + 1;
-    return maxdepth[i];
-    */
->>>>>>> 8b3c767f0da37eaabe51c9dda5ccf2629433e075:project/traghetti.cpp
 }
 
 vector<int> maxwalk()
 {
-  /*
     vector<int> nodes[n];
     size_t i;
     size_t startleaf;
 
     for (i=0; i != n; i++)
         if (edges[i].size() == 1) {
-            edges[i].push_back(i);
+            nodes[i].push_back(i);
             startleaf = i;
         }
 
@@ -64,12 +50,7 @@ vector<int> maxwalk()
         if (maxpath.size() < nodes[i].size())
             maxpath = nodes[i];
 
-<<<<<<< HEAD:traghetti.cpp
     return maxpath;
-=======
-    return *max_element(nodes, nodes+n);
-    */
->>>>>>> 8b3c767f0da37eaabe51c9dda5ccf2629433e075:project/traghetti.cpp
 }
 
 int main()
@@ -87,23 +68,8 @@ int main()
         edges[end].push_back(start);
     }
 
-<<<<<<< HEAD:traghetti.cpp
 
-    vector<int> v = maxwalk();
-
-    for (vector<int>::iterator it = v.begin(); it!=v.end(); it++)
-        cout << *it << " ";
-    cout << endl;
-=======
-    vector<int> path;
-    path.push_back(0);
-    path.push_back(2);
-    path.push_back(3);
-    path.push_back(5);
-    path.push_back(7);
-    path.push_back(8);
-    path.push_back(10);
-
+    vector<int> path = maxwalk();
     pair<int, int> zombieEdge;
     pair<int, int> newEdge;
 
@@ -117,9 +83,8 @@ int main()
 
     newEdge = make_pair(path[start / 2], path[path.size() - (end / 2)]);
 
-    cout << "zombie: " << zombieEdge.first << "-" << zombieEdge.second;
-    cout << endl << "new: " << newEdge.first << "-" << newEdge.second;
->>>>>>> 8b3c767f0da37eaabe51c9dda5ccf2629433e075:project/traghetti.cpp
+    out << zombieEdge.first << " " << zombieEdge.second << endl;
+    out << newEdge.first << " " << newEdge.second;
 
     return 0;
 }
