@@ -25,7 +25,7 @@ vector<int> bfs(int node) {
 
     for(int i=0; i<edges[v].size(); i++) {
       u = edges[v][i];
-      if(nodesBool[u] == false) {
+      if(!nodesBool[u]) {
         parent[u] = v;
         nodesBool[u] = true;
         q.push(u);
