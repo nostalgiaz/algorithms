@@ -23,7 +23,6 @@ vector<int> bfs(int node) {
   while(!q.empty()) {
     v = q.front();
     q.pop();
-
     for(size_t i=0; i<edges[v].size(); i++) {
       u = edges[v][i];
       if (!visited[u]) {
@@ -74,9 +73,8 @@ int main()
     pair<int, int> zombieEdge;
     pair<int, int> newEdge;
 
-    start = end = (path.size() - 1 + path.size() %2) / 2;
+    start = end = (path.size() - 1) / 2 - path.size() %2;
     end++;
-    cout << start << path.size() << endl;
 
     ret[0] = path[start];
     ret[1] = path[end];
@@ -91,6 +89,22 @@ int main()
     vector<int> right = bfs(path[path.size()-1]);
     ret[2] = left[left.size() / 2];
     ret[3] = right[right.size() / 2];
+
+    cout << "PATH: ";
+    for(int i=0; i<path.size(); i++)
+      cout << path[i] << " ";
+    cout << endl;
+
+    cout << "LEFT: ";
+    for(int i=0; i<left.size(); i++)
+      cout << left[i] << " ";
+    cout << endl;
+
+    cout << "RIGHT: ";
+    for(int i=0; i<right.size(); i++)
+      cout << right[i] << " ";
+    cout << endl;
+
 
     out << ret[0] << " " << ret[1] << endl
         << ret[2] << " " << ret[3];
