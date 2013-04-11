@@ -48,11 +48,8 @@ vector<int> maxwalk()
     vector<int> tmp;
     size_t i;
 
-    for (i=0; i != n; i++)
-        if (edges[i].size() == 1) {
-            tmp = bfs(i);
-            return bfs(tmp[0]);
-        }
+    tmp = bfs(0);
+    return bfs(tmp[0]);
 
     return maxPath;
 }
@@ -77,11 +74,9 @@ int main()
     pair<int, int> zombieEdge;
     pair<int, int> newEdge;
 
-    start = end = path.size() / 2;
-    if(path.size() % 2 == 1) // odd
-      end++;
-    else // even
-      start--;
+    start = end = (path.size() - 1 + path.size() %2) / 2;
+    end++;
+    cout << start << path.size() << endl;
 
     zombieEdge = make_pair(path[start], path[end]);
 
