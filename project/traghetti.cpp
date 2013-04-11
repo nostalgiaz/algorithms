@@ -62,109 +62,97 @@ void printPath(vector<int> cucu) {
   cout << endl;
 }
 
-void doSomething() {
-  pair<int, int> zombieEdge, zombieEdgeR;
-  pair<int, int> newEdge, newEdgeR;
-  vector<int> left, right, leftR, rightR, *v;
-  start = (path.size()  - 1)/ 2 - path.size()%2;
-  end = start + 1;
+int* lengthOf(int start, int end, int * response) {
+  vector<int> tmp2;
+  response[1] = path[start];
+  response[2] = path[end];
 
-  zombieEdge = make_pair(path[start], path[end]);
+  fill(visited, visited+n, false);
+  visited[response[2]] = true;
+  tmp2 = bfs(path[0]);
+  fill(visited, visited+n, false);
+  visited[response[2]] = true;
+  vector<int> left = bfs(tmp2[0]);
 
-
-    fill(visited, visited+n, false);
-  visited[zombieEdge.second] = true;
-  left = bfs(zombieEdge.first);
+  cout << "SPACCO A: " << response[1] << " " << response[2] << endl;
 
   cout << "LEFT :";
   printPath(left);
 
   fill(visited, visited+n, false);
-  visited[zombieEdge.first] = true;
-  right = bfs(zombieEdge.second);
+  visited[response[1]] = true;
+  tmp2 = bfs(path[path.size() - 1]);
+  fill(visited, visited+n, false);
+  visited[response[1]] = true;
+  vector<int> right = bfs(tmp2[0]);
 
   cout << "RIGHT :";
   printPath(right);
 
-  cout << "CASO 1: " << zombieEdge.first << " " << zombieEdge.second << endl;
+  vector<int> *v = &edges[response[2]];
+  v->erase(find(v->begin(), v->end(), response[1]));
+  v = &edges[response[1]];
+  v->erase(find(v->begin(), v->end(), response[2]));
 
-  if(path.size() % 2 == 1) {  // odd
+  response[3] = left[left.size() / 2];
+  response[4] = right[right.size()/ 2];
 
-    v = &edges[zombieEdge.second];
-    v->erase(find(v->begin(), v->end(), zombieEdge.first));
-    v = &edges[zombieEdge.first];
-    v->erase(find(v->begin(), v->end(), zombieEdge.second));
+  cout << "ATTACCO A: " << response[3] << " " << response[4] << endl;
 
-  newEdge = make_pair(left[left.size() / 2], right[right.size() /2]);
-  edges[newEdge.first].push_back(newEdge.second);
-  edges[newEdge.second].push_back(newEdge.first);
+  edges[response[3]].push_back(response[4]);
+  edges[response[4]].push_back(response[3]);
 
-    fill(visited, visited+n, false);
-    vector<int> m1 = maxwalk();
-    cout << newEdge.first << " " << newEdge.second << endl;
-    cout << "M1: ";
-    printPath(m1);
+  fill(visited, visited+n, false);
+  vector<int> tmp = maxwalk();
+  cout << "CAMMINO ORA PIU LUNGO: ";
+  printPath(tmp);
 
-    edges[zombieEdge.second].push_back(zombieEdge.first);
-    edges[zombieEdge.first].push_back(zombieEdge.second);
+  response[0] = tmp.size();
 
-    v = &edges[newEdge.first];
-    v->erase(find(v->begin(), v->end(), newEdge.second));
-    v = &edges[newEdge.second];
-    v->erase(find(v->begin(), v->end(), newEdge.first));
+  cout << "DI DIMENSIONE: " << response[0];
 
-    // restored graph
+  v = &edges[response[4]];
+  v->erase(find(v->begin(), v->end(), response[3]));
+  v = &edges[response[3]];
+  v->erase(find(v->begin(), v->end(), response[4]));
 
-    int startR = start + 1;
-    int endR = end + 1;
-    zombieEdgeR = make_pair(path[startR], path[endR]);
+  edges[response[1]].push_back(response[2]);
+  edges[response[2]].push_back(response[1]);
 
-    fill(visited, visited+n, false);
-    visited[zombieEdgeR.second] = true;
-    leftR = bfs(zombieEdgeR.first);
+  cout << endl << endl;
 
-    fill(visited, visited+n, false);
-    visited[zombieEdgeR.first] = true;
-    rightR = bfs(zombieEdgeR.second);
+  return response;
+}
 
-    newEdgeR = make_pair(leftR[leftR.size() / 2], rightR[rightR.size() /2]);
+void doSomething() {
+  // 0 lenght, 1 zombieFirst, 2 zombieLast, 3 newFirst, 4 newLast
+  int result[4][5];
+  int start = path.size()/ 2 -1;
+  int end = start + 1;
 
-    edges[newEdgeR.second].push_back(newEdgeR.first);
-    edges[newEdgeR.first].push_back(newEdgeR.second);
+  lengthOf(start, end, result[1]);
+  lengthOf(start-1, end-1, result[0]);
+  lengthOf(start+1, end+1, result[2]);
 
-    v = &edges[zombieEdgeR.first];
-    v->erase(find(v->begin(), v->end(), zombieEdgeR.second));
-    v = &edges[zombieEdgeR.second];
-    v->erase(find(v->begin(), v->end(), zombieEdgeR.first));
+  if(path.size() % 2 == 1) // odd
+    lengthOf(start + 2, end + 2, result[3]);
+  else *result[3] = -1;
 
-    cout << "CASO 2: " << zombieEdgeR.first << " " << zombieEdgeR.second << endl;
-    fill(visited, visited+n, false);
-    vector<int> m2 = maxwalk();
+    cout << result[0][0] << " " << result[1][0] << " " << result[2][0] <<" " << result[3][0] << endl;
 
-    cout << newEdgeR.first << " " << newEdgeR.second << endl;
-    cout << "M2: ";
-    printPath(m2);
-    cout << "DIFFERENCE " << m1.size() << " - " << m2.size() << endl;
+    int min_ = result[0][0];
+    int index = 0;
 
-    if(m1.size() <= m2.size()) {
-      ret[0] = zombieEdge.first;
-      ret[1] = zombieEdge.second;
-      ret[2] = newEdge.first;
-      ret[3] = newEdge.second;
-    }
-    else {
-      ret[0] = zombieEdgeR.first;
-      ret[1] = zombieEdgeR.second;
-      ret[2] = newEdgeR.first;
-      ret[3] = newEdgeR.second;
-    }
-  }
-  else {
-    ret[0] = path[start];
-    ret[1] = path[end];
-    ret[2] = left[left.size() / 2];
-    ret[3] = right[right.size() / 2];
-  }
+    for(int i=1; i<4; i++)
+      if(result[i][0] != -1) {
+        if(min_ > result[i][0]) {
+          min_ = result[i][0];
+          index = i;
+        }
+      }
+
+    for(int i=0; i<4; i++)
+      ret[i] = result[index][i+1];
 }
 
 int main(int argc, char **argv)
@@ -183,7 +171,6 @@ int main(int argc, char **argv)
   }
 
   path = maxwalk();
-
   doSomething();
 
   out << ret[0] << " " << ret[1] << endl
