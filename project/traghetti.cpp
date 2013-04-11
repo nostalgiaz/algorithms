@@ -12,31 +12,30 @@ vector<int>* edges;
 vector<int> bfs(int node) {
   int u, v;
   queue<int> q;
-  vector<int> parent (n, -1);
-  vector<bool> nodesBool (n, false);
+  vector<int> parent(n, -1);
+  bool visited[n];
   vector<int> maxPath;
 
+  fill(visited, visited+n, false);
+  visited[node] = true;
   q.push(node);
-  nodesBool[node] = true;
 
   while(!q.empty()) {
     v = q.front();
     q.pop();
 
-    for(int i=0; i<edges[v].size(); i++) {
+    for(size_t i=0; i<edges[v].size(); i++) {
       u = edges[v][i];
-      if(!nodesBool[u]) {
+      if (!visited[u]) {
         parent[u] = v;
-        nodesBool[u] = true;
+        visited[u] = true;
         q.push(u);
       }
     }
   }
 
-  while(v != -1) {
+  for (; v != -1; v = parent[v])
     maxPath.push_back(v);
-    v = parent[v];
-  }
 
   return maxPath;
 }
@@ -53,15 +52,17 @@ vector<int> maxwalk()
             tmp = bfs(i);
             return bfs(tmp[0]);
         }
-
     return maxPath;
 }
 
 int main()
 {
+    int start, end;
+    int ret[4];
     ifstream in("input.txt");
     ofstream out("output.txt");
-    int start, end;
+    vector<int> path;
+
 
     in >> n >> m;
     edges = new vector<int>[n];
@@ -72,47 +73,29 @@ int main()
         edges[end].push_back(start);
     }
 
-    vector<int> path = maxwalk();
-
-    pair<int, int> zombieEdge;
-    pair<int, int> newEdge;
-
-    start = end = path.size() / 2;
+    path = maxwalk();
+    start = end = (path.size()- (1+path.size())%2) / 2;
     if(path.size() % 2 == 1) // odd
       end++;
-    else // even
+    else
       start--;
 
-    zombieEdge = make_pair(path[start], path[end]);
+    ret[0] = path[start];
+    ret[1] = path[end];
 
-    vector<int>* v = &edges[zombieEdge.first];
-    v->erase(find(v->begin(), v->end(), zombieEdge.second));
+    vector<int>* v = &edges[ret[0]];
+    v->erase(find(v->begin(), v->end(), ret[1]));
 
-    v = &edges[zombieEdge.second];
-    v->erase(find(v->begin(), v->end(), zombieEdge.first));
+    v = &edges[ret[1]];
+    v->erase(find(v->begin(), v->end(), ret[0]));
 
-  vector<int> left = bfs(path[0]);
-  vector<int> right = bfs(path[path.size() -1]);
+    vector<int> left = bfs(path[0]);
+    vector<int> right = bfs(path[path.size()-1]);
+    ret[2] = left[left.size() / 2];
+    ret[3] = right[right.size() / 2];
 
-  cout << "PATH: ";
-  for(int i=0; i<path.size(); i++)
-    cout << path[i] << " ";
-  cout << endl;
-
-  cout << "LEFT: ";
-  for(int i=0; i<left.size(); i++)
-    cout << left[i] << " ";
-  cout << endl;
-
-  cout << "RIGHT: ";
-  for(int i=0; i<right.size(); i++)
-    cout << right[i] << " ";
-  cout << endl;
-
-   newEdge = make_pair(left[left.size() / 2], right[right.size() / 2]);
-
-    out << zombieEdge.first << " " << zombieEdge.second << endl;
-    out << newEdge.first << " " << newEdge.second;
+    out << ret[0] << " " << ret[1] << endl
+        << ret[2] << " " << ret[3];
 
     return 0;
 }
