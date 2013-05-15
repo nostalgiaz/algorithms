@@ -6,7 +6,13 @@ using namespace std;
 
 int night, moment, maxChanges;
 bool **matrix;
-string tmp;
+string s;
+
+int t(bool * s, bool v, int i, int c) {
+  if(v==s[i])
+    return t(s, v, i+1, c) + 1;
+
+}
 
 int main (void) {
   ifstream in("input.txt");
@@ -17,9 +23,9 @@ int main (void) {
     matrix[i] = new bool[moment];
 
   for(int i=0; i<night; i++) {
-    in >> tmp;
-    for(int j=0; j<tmp.size(); j++)
-      matrix[i][j] = tmp[j] == 'H';
+    in >> s;
+    for(int j=0; j<s.size(); j++)
+      matrix[i][j] = s[j] == 'H';
   }
 
   for(int i=0; i<night; i++) {
