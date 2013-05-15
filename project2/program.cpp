@@ -41,11 +41,12 @@ int m(void) {
 
     for (size_t i=1; i!=N; i++) {
         for (size_t c=0; c!=C; c++)
-            for (size_t g=0; g!=c; g++)
+            for (size_t g=0; g<=c; g++)
                 M[i%2][c] = max(M[i%2][c], M[(i-1)%2][g] + T[N-i-1][c-g]);
     }
 
-    return *max_element(M[(N-1)%2], M[(N-1)%2]+C);
+    return max(*max_element(M[0], M[0]+C),
+               *max_element(M[1], M[1]+C));
 }
 
 
