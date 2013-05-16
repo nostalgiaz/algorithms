@@ -8,27 +8,44 @@ using namespace std;
 
 int N, moments, C;
 bool **matrix;
-int ***Tmiddle;
 string s;
-
-int t(bool * s, bool v, int i, int c) {
-  if (i == moments)
-      return 0;
-
-  if (v == s[i]) // tengo
-      return t(s, v, i+1, c) + 1;
-  else if (v != s[i] && c == 0) // ignoro
-      return t(s, v, i+1, c);
-  else if (v != s[i] && c > 0) // ignoro o cambio
-      return max(
-            t(s, v, i+1, c),
-            t(s, !v, i+1, c-1) +1
-      );
-}
-
 
 int** M;
 int** T;
+
+
+void t(size_t s_i) {
+    bool* s = matrix[s_i];
+    size_t c;
+
+    int** TT[2] ;
+    TT[0] = new int*[C];
+    TT[1] = new int*[C];
+    for (c=0; c!=C; c++) {
+        TT[0][c] = new int[moments];
+        TT[1][c] = new int[moments];
+    }
+
+
+    for (c=0; c!=C; c++) {
+        TT[0][c][moments-1] = s[moments-1] == 0;
+        TT[1][c][moments-1] = s[moments-1] == 1;
+
+        for (int i=moments-2; i>=0; i--)
+            for (size_t mask=0; mask!=2; mask++)
+                if (mask == s[i])
+                    TT[mask][c][i] = TT[mask][c][i+1] + 1;
+                else if (c == 0)
+                    TT[mask][c][i] = TT[mask][c][i+1];
+                else
+                    TT[mask][c][i] = max(TT[mask][c][i+1],
+                                         TT[1-mask][c-1][i+1]+1);
+    }
+
+    for (c=0; c!=C; c++)
+        T[s_i][c+1] = max(TT[0][c][0], TT[1][c][0]);
+}
+
 
 int m(void) {
     C++;
@@ -71,12 +88,8 @@ int main(int argc, char** argv) {
   for(size_t i=0; i<N; i++)
     T[i][0] = 0;
 
-  for (size_t i=0; i != N; i++) {
-      for (size_t c=1; c != C+1; c++) {
-          T[i][c] = max(t(matrix[i], true, 0, c-1),
-                        t(matrix[i], false, 0, c-1));
-      }
-  }
+  for (size_t i=0; i != N; i++) t(i);
+
   cout << endl;
   cout << "### T ###" << endl;
   for (size_t i=0; i!=N; i++) {
