@@ -12,19 +12,13 @@ string s;
 
 int** M;
 int** T;
+int** TT[2] ;
 
 
 void t(size_t s_i) {
     bool* s = matrix[s_i];
     size_t c;
 
-    int** TT[2] ;
-    TT[0] = new int*[C];
-    TT[1] = new int*[C];
-    for (c=0; c!=C; c++) {
-        TT[0][c] = new int[moments];
-        TT[1][c] = new int[moments];
-    }
 
 
     for (c=0; c!=C; c++) {
@@ -83,6 +77,13 @@ int main(int argc, char** argv) {
     in >> s;
     for(int j=0; j<s.size(); j++)
       matrix[i][j] = s[j] == 'H';
+  }
+
+  TT[0] = new int*[C];
+  TT[1] = new int*[C];
+  for (size_t c=0; c!=C; c++) {
+      TT[0][c] = new int[moments];
+      TT[1][c] = new int[moments];
   }
 
   T = new int*[N];
