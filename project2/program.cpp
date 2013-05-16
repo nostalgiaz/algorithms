@@ -28,8 +28,8 @@ void t(size_t s_i) {
 
 
     for (c=0; c!=C; c++) {
-        TT[0][c][moments-1] = s[moments-1] == 0;
-        TT[1][c][moments-1] = s[moments-1] == 1;
+        TT[0][c][moments-1] = s[moments-1] == 0 || c > 0;
+        TT[1][c][moments-1] = s[moments-1] == 1 || c > 0;
 
         for (int i=moments-2; i>=0; i--)
             for (size_t mask=0; mask!=2; mask++)
@@ -44,6 +44,7 @@ void t(size_t s_i) {
 
     for (c=0; c!=C; c++)
         T[s_i][c+1] = max(TT[0][c][0], TT[1][c][0]);
+
 }
 
 
@@ -70,6 +71,8 @@ int m(void) {
 
 int main(int argc, char** argv) {
   ifstream in(argc > 1 ? argv[1] : "input.txt");
+  ofstream out("output.txt");
+
   in >> N >> moments >> C;
 
   matrix = new bool *[N];
@@ -89,13 +92,5 @@ int main(int argc, char** argv) {
     T[i][0] = 0;
 
   for (size_t i=0; i != N; i++) t(i);
-
-  cout << endl;
-  cout << "### T ###" << endl;
-  for (size_t i=0; i!=N; i++) {
-      for (size_t j=0; j!=C+1; j++)
-          cout << T[i][j] << ", ";
-      cout << endl;
-  }
-  cout << m() << endl;
+  out << m() << endl;
 }
